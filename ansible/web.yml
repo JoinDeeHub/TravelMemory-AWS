@@ -1,0 +1,49 @@
+- hosts: web
+  become: yes
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - git
+        state: present
+
+    - name: Install NodeSource Node.js 18
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+      args:
+        executable: /bin/bash
+
+    - name: Install Node.js
+      apt:
+        name: nodejs
+        state: present
+
+    - name: Install PM2 globally
+      npm:
+        name: pm2
+        global: yes
+
+    - name: Clone Application
+      git:
+        repo: https://github.com/UnpredictablePrashant/TravelMemory.git
+        dest: /home/ubuntu/app
+        force: yes
+
+    - name: Install Backend Dependencies
+      npm:
+        path: /home/ubuntu/app/backend
+
+    - name: Install Frontend Dependencies
+      npm:
+        path: /home/ubuntu/app/frontend
+
+    - name: Build Frontend
+      command: npm run build
+      args:
+        chdir: /home/ubuntu/app/frontend
